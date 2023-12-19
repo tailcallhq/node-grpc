@@ -17,28 +17,43 @@ const server = new grpc.Server();
 // Enable Reflection
 addReflection(server, "./descriptor_set.bin");
 
-const news = [
+const NEWS = [
   { id: "1", title: "Note 1", body: "Content 1", postImage: "Post image 1" },
   { id: "2", title: "Note 2", body: "Content 2", postImage: "Post image 2" },
+  { id: "3", title: "Note 3", body: "Content 3", postImage: "Post image 3" },
+  { id: "4", title: "Note 4", body: "Content 4", postImage: "Post image 4" },
+  { id: "5", title: "Note 5", body: "Content 5", postImage: "Post image 5" },
 ];
 
 server.addService(newsProto.NewsService.service, {
   getAllNews: (_, callback) => {
-    callback(null, { news: news });
+    callback(null, { news: NEWS });
   },
   getNews: (_, callback) => {
     const newsId = _.request.id;
-    const newsItem = news.find(({ id }) => newsId == id);
+    const newsItem = NEWS.find(({ id }) => newsId == id);
     callback(null, newsItem);
+  },
+  getMultipleNews: (service, callback) => {
+    const ids = new Set(service.request.ids.map(e => e.id));
+    const result = [];
+
+    for (const news of NEWS) {
+      if (ids.has(news.id)) {
+        result.push(news);
+      }
+    }
+
+    callback(null, { news: result });
   },
   deleteNews: (_, callback) => {
     const newsId = _.request.id;
-    news = news.filter(({ id }) => id !== newsId);
+    NEWS = NEWS.filter(({ id }) => id !== newsId);
     callback(null, {});
   },
   editNews: (_, callback) => {
     const newsId = _.request.id;
-    const newsItem = news.find(({ id }) => newsId == id);
+    const newsItem = NEWS.find(({ id }) => newsId == id);
     newsItem.body = _.request.body;
     newsItem.postImage = _.request.postImage;
     newsItem.title = _.request.title;
@@ -46,7 +61,7 @@ server.addService(newsProto.NewsService.service, {
   },
   addNews: (call, callback) => {
     let _news = { id: Date.now(), ...call.request };
-    news.push(_news);
+    NEWS.push(_news);
     callback(null, _news);
   },
 });
