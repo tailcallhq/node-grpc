@@ -25,7 +25,7 @@ const NEWS = [
   { id: 5, title: "Note 5", body: "Content 5", postImage: "Post image 5" },
 ];
 
-server.addService(newsProto.NewsService.service, {
+server.addService(newsProto.news.NewsService.service, {
   getAllNews: (_, callback) => {
     callback(null, { news: NEWS });
   },
